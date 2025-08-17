@@ -1,0 +1,59 @@
+ 
+ Homepage
+ 
+ --------------------------------------------------
+| HorrorVerse Logo         [About] [Pricing] [Join] |
+ --------------------------------------------------
+
+| 🎃 "Where Horror Creators Build Their Empire"    |
+| "Sell merch, share art, grow your cult following."|
+| [JOIN WAITLIST] (Big red button)                  |
+
+| How It Works (3 steps):                           |
+| [Icon] Build Hub  [Icon] Sell Merch  [Icon] Grow  |
+
+| Showcase Horror Creators (scrollable gallery)     |
+
+| Pricing Preview: Free / Premium / Pro             |
+
+| Footer: Contact | Privacy | Terms | Social Links  |
+ -------------------------------------------------- 
+ 
+ 
+ 
+ Creator Dashboard
+ 
+  ---------------------------------------------------
+| Sidebar:              | Main Panel:               |
+| [Home]                | Welcome Back, [Name]!      |
+| [My Page Settings]    | Stats: Visitors | Sales    |
+| [Merch Listings]      | Customize Page Button      |
+| [Blog/Updates]        | Upload New Merch Button    |
+| [Payments/Earnings]   | Recent Transactions List   |
+| [Support]             |                            |
+ ---------------------------------------------------
+
+
+Creater Profile Page
+
+ ---------------------------------------------------
+| Banner Image (horror themed, chosen by creator)   |
+| Profile Picture    Name/Bio                       |
+| [Social Media Links: TikTok | IG | YouTube]        |
+
+| Section: "Merch for Sale" (Products grid)          |
+
+| Section: "Latest from [Creator Name]" (Blog posts) |
+
+| Footer: Powered by HorrorVerse                    |
+ ---------------------------------------------------
+
+
+Visual Style:
+Everything horror-themed:
+
+Dark backgrounds (black/charcoal)
+
+Red hover effects
+
+Smooth but "creepy" transitions (fades, slow reveals)

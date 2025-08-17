@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Posts | HorrorVerse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #000, #1a0000);
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+    .slide-up { animation: slideUp 1s ease-out forwards; }
+    .pop-in { animation: popIn 0.6s ease-out forwards; }
+
+    .sidebar {
+      width: 220px;
+      background-color: rgba(26, 26, 26, 0.9);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+      height: 100vh;
+    }
+
+    .sidebar .logo img {
+      height: 60px;
+      margin-bottom: 20px;
+    }
+
+    .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .sidebar ul li a {
+      display: block;
+      padding: 12px 20px;
+      color: #f5f5f5;
+      text-decoration: none;
+      border-bottom: 1px solid #333;
+      transition: background 0.3s;
+      border-radius: 5px;
+      font-family: 'Creepster', cursive;
+      font-size: 18px;
+    }
+
+    .sidebar ul li a:hover {
+      background-color: #ff0000;
+      color: #000;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+      background-color: rgba(10, 10, 10, 0.7);
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-family: 'Creepster', cursive;
+      font-size: 40px;
+      color: #ff4444;
+      text-shadow: 0 0 10px red;
+      margin-bottom: 20px;
+    }
+
+    form {
+      background-color: rgba(26, 26, 26, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      background-color: #333;
+      color: #f5f5f5;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #ff0000;
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #a10000;
+    }
+
+    .post-list {
+      margin-top: 40px;
+    }
+
+    .post-item {
+      background-color: rgba(26, 26, 26, 0.9);
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+      position: relative;
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .post-item h3 {
+      margin: 0 0 10px 0;
+      color: #ff4444;
+    }
+
+    .post-item .author {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+
+    .post-item .actions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .post-item .actions button {
+      background: none;
+      border: none;
+      color: #f5f5f5;
+      cursor: pointer;
+      margin-left: 10px;
+      font-size: 14px;
+    }
+
+    .post-item .actions button:hover {
+      color: #ff4444;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar slide-up">
+    <div class="logo pop-in">
+      <img src="horrorverse-logo-2.png" alt="HorrorVerse Logo">
+    </div>
+    <ul>
+      <li><a href="dashboard.html">← Back to Dashboard</a></li>
+      <li><a href="merch.html">Merch</a></li>
+      <li><a href="posts.html">Posts</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="#" onclick="logout()">Logout</a></li>
+    </ul>
+  </div>
+
+  <div class="main fade-in">
+    <h1 class="pop-in">Create a Post</h1>
+
+    <form id="post-form" class="slide-up">
+      <input type="text" id="title" placeholder="Post Title" required />
+      <textarea id="content" placeholder="Write your horror story or update..." rows="6" required></textarea>
+      <button type="submit">Publish Post</button>
+    </form>
+
+    <div class="post-list" id="post-list"></div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <script src="/firebase-init.js"></script>
+  <script>
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser;
+    let currentTier = "Free";
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        currentUser = user;
+        const doc = await db.collection("users").doc(user.uid).get();
+        currentTier = doc.data()?.membership || "Free";
+
+        if (currentTier === "Free") {
+          alert("Upgrade your membership to post more content.");
+          window.location.href = "membership.html";
+          return;
+        }
+
+        loadPosts();
+      }
+    });
+
+    const form = document.getElementById('post-form');
+    const postList = document.getElementById('post-list');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = form.title.value;
+      const content = form.content.value;
+
+      await db.collection('posts').add({
+        title,
+        content,
+        author: currentUser.email,
+        createdAt: new Date()
+      });
+
+      form.reset();
+      loadPosts();
+    });
+
+    async function loadPosts() {
+      postList.innerHTML = '';
+      const snapshot = await db.collection('posts').orderBy('createdAt', 'desc').get();
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        const postId = doc.id;
+        const div = document.createElement('div');
+        div.className = 'post-item';
+
+        div.innerHTML = `
+          <h3>${post.title}</h3>
+          <div class="author">by ${post.author}</div>
+          <p>${post.content}</p>
+          ${post.author === currentUser.email ? `<div class="actions">
+            <button onclick="deletePost('${postId}')">Delete</button>
+          </div>` : ''}
+        `;
+
+        postList.appendChild(div);
+      });
+    }
+
+    async function deletePost(id) {
+      if (confirm("Are you sure you want to delete this post?")) {
+        await db.collection("posts").doc(id).delete();
+        loadPosts();
+      }
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Creator Dashboard | HorrorVerse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #000, #1a0000);
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: rgba(26, 26, 26, 0.9);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    }
+
+    .sidebar .logo img {
+      height: 60px;
+      margin-bottom: 20px;
+    }
+
+    .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .sidebar ul li a {
+      display: block;
+      padding: 12px 20px;
+      color: #f5f5f5;
+      text-decoration: none;
+      border-bottom: 1px solid #333;
+      transition: background 0.3s;
+      border-radius: 5px;
+      font-family: 'Creepster', cursive;
+      font-size: 18px;
+    }
+
+    .sidebar ul li a:hover {
+      background-color: #ff0000;
+      color: #000;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background-color: rgba(26, 26, 26, 0.9);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+    }
+
+    .topbar h1 {
+      font-family: 'Creepster', cursive;
+      color: #ff4444;
+      font-size: 32px;
+      text-shadow: 0 0 10px #ff0000;
+    }
+
+    .topbar .user-info {
+      font-size: 16px;
+      color: #ccc;
+    }
+
+    .content {
+      padding: 30px;
+      background-color: rgba(10, 10, 10, 0.7);
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section h2 {
+      font-family: 'Creepster', cursive;
+      color: #ff4444;
+      font-size: 26px;
+      text-shadow: 0 0 5px red;
+      margin-bottom: 15px;
+    }
+
+    .post-item {
+      background-color: rgba(26, 26, 26, 0.9);
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+    }
+
+    .post-item h3 {
+      margin: 0 0 10px 0;
+      color: #ff4444;
+    }
+
+    .post-item .author {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+
+    .tier-badge {
+  font-size: 14px;
+  background-color: #222;
+  padding: 5px 10px;
+  border: 1px solid #ff0000;
+  border-radius: 20px;
+  color: #ff4444;
+  margin-left: 20px;
+  text-shadow: 0 0 5px red;
+    }
+  
+
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <img src="horrorverse-logo-2.png" alt="HorrorVerse Logo">
+  </div>
+  <ul>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="merch.html">Merch</a></li>
+    <li><a href="posts.html">Posts</a></li>
+    <li><a href="accountsettings.html">Settings</a></li>
+    <li><a href="membership.html">Membership</a></li>
+    <li><a href="#" onclick="logout()">Logout</a></li>
+  </ul>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <h1>Creator Dashboard</h1>
+    <div class="tier-badge" id="tier-badge">Tier: ...</div>
+    <div class="user-info" id="user-info">Loading...</div>
+  </div>
+  <div class="content">
+    <div class="section">
+      <h2>All Creator Posts</h2>
+      <div id="all-posts"></div>
+    </div>
+
+    <div class="section">
+      <h2>Your Posts</h2>
+      <div id="your-posts"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+<script src="/firebase-init.js"></script>
+<script>
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  let currentUser;
+  let currentTier;
+
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      currentUser = user;
+      document.getElementById("user-info").textContent = user.email;
+      await loadMembershipTier();
+      document.getElementById("tier-badge").textContent = `Tier: ${currentTier}`;
+      enforceTierRestrictions();
+      loadPosts();
+      function enforceTierRestrictions() {
+  if (currentTier === "Free") {
+    const merchLink = document.querySelector("a[href='merch.html']");
+    if (merchLink) {
+      merchLink.textContent += " (Pro+)";
+      merchLink.style.pointerEvents = "none";
+      merchLink.style.opacity = "0.4";
+      merchLink.title = "Upgrade to Pro or Elite to access Merch";
+    }
+  }
+}
+    } else {
+      window.location.href = "login.html";
+    }
+  });
+
+  async function loadMembershipTier() {
+    const doc = await db.collection("users").doc(currentUser.uid).get();
+    currentTier = doc.data()?.membership || "Free";
+  }
+
+  function createPostElement(post) {
+    const div = document.createElement("div");
+    div.className = "post-item";
+    div.innerHTML = `<h3>${post.title}</h3><div class="author">by ${post.author}</div><p>${post.content}</p>`;
+    return div;
+  }
+
+  async function loadPosts() {
+    const allPostsContainer = document.getElementById("all-posts");
+    const yourPostsContainer = document.getElementById("your-posts");
+    allPostsContainer.innerHTML = "";
+    yourPostsContainer.innerHTML = "";
+
+    const snapshot = await db.collection("posts").orderBy("createdAt", "desc").get();
+    let personalPostCount = 0;
+
+    snapshot.forEach(doc => {
+      const post = doc.data();
+      const postElement = createPostElement(post);
+      allPostsContainer.appendChild(postElement);
+
+      if (post.author === currentUser.email) {
+        personalPostCount++;
+        if (currentTier === "Free" && personalPostCount > 3) return;
+        yourPostsContainer.appendChild(postElement.cloneNode(true));
+      }
+    });
+
+    if (currentTier === "Free" && personalPostCount > 3) {
+      const warning = document.createElement("div");
+      warning.style.color = "orange";
+      warning.style.marginTop = "15px";
+      warning.innerHTML = "🚫 You've reached your post limit for the Free plan. Upgrade your membership to post more.";
+      yourPostsContainer.appendChild(warning);
+    }
+  }
+
+  function logout() {
+    auth.signOut().then(() => {
+      window.location.href = "login.html";
+    });
+  }
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
