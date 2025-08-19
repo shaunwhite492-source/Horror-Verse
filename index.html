@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HorrorVerse - Build Your Horror Empire</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #0a0a0a;
+        color: #f5f5f5;
+        text-align: center;
+      }
+  
+      header {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #1a1a1a;
+      }
+  
+      header a {
+        color: #f5f5f5;
+        text-decoration: none;
+        margin: 0 15px;
+        font-size: 18px;
+      }
+  
+      .hero {
+        padding: 100px 20px 50px;
+      }
+  
+      h1, h2 {
+        font-family: 'Creepster', cursive;
+        color: #ff0000;
+      }
+  
+      .hero p {
+        font-size: 20px;
+        margin: 20px 0 40px;
+      }
+  
+      .typing-effect {
+        overflow: hidden;
+        border-right: .15em solid #ff0000;
+        white-space: nowrap;
+        margin: 0 auto;
+        letter-spacing: .1em;
+        animation: typing 3.5s steps(40, end), blink .75s step-end infinite;
+        font-size: 48px;
+        font-family: 'Creepster', cursive;
+      }
+  
+      @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+      }
+  
+      @keyframes blink {
+        50% { border-color: transparent; }
+      }
+  
+      .cta-button,
+      input[type="submit"] {
+        background-color: #ff0000;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s, text-shadow 0.3s;
+      }
+  
+      .cta-button:hover,
+      input[type="submit"]:hover {
+        background-color: #8b0000;
+        text-shadow: 0 0 10px #ff0000;
+      }
+  
+      form {
+        margin-top: 40px;
+      }
+  
+      input[type="email"] {
+        padding: 12px;
+        font-size: 18px;
+        width: 300px;
+        max-width: 80%;
+        margin-bottom: 20px;
+        border: none;
+        border-radius: 5px;
+      }
+  
+      input[type="email"]::placeholder {
+        color: #999;
+        font-style: italic;
+      }
+  
+      ul li {
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #f5f5f5;
+      }
+  
+      footer {
+        margin-top: 80px;
+        padding: 20px;
+        background-color: #1a1a1a;
+        font-size: 14px;
+      }
+    </style>
+  </head>  
+<body>
+
+<header>
+  <img src="horrorverse-logo-2.png" alt="HorrorVerse Logo" style="height: 60px;">
+  <nav>
+    <a href="#about">About</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#join">Join</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="typing-effect">Summon Your Horror Empire</div>
+  <p>
+    This isn’t just another platform. This is your domain — built for the cursed, the creators of nightmares, and the ones who bleed horror.  
+    Sell your merch. Share your madness. Cultivate your cult.
+  </p>
+  <a href="#join"><button class="cta-button">Enter the Waitlist</button></a>
+</section>
+
+<section id="join">
+  <h2>Join the Cult</h2>
+  <p>
+    HorrorVerse is rising from the shadows. The first wave of creators will:
+  </p>
+  <ul style="list-style-type: none; padding: 0; margin-bottom: 20px;">
+    <li>🩸 Claim a custom horror-branded creator page</li>
+    <li>🩸 Sell their twisted creations & collectibles</li>
+    <li>🩸 Be featured in the HorrorVerse bloodline</li>
+  </ul>
+  <form action="https://formspree.io/f/xblodwyz" method="POST">
+    <input type="hidden" name="_redirect" value="https://www.horror-verse.com/thankyou.html">
+    
+    <input type="email" name="email" placeholder="Enter your email (the blood pact)" required>
+    <br>
+    <input type="submit" value="Join the Cult">
+  </form>
+  
+  <p style="font-size: 14px; color: #777; margin-top: 10px;">
+    You bring the fear. We bring the fire.
+  </p>
+</section>
+
+
+<footer>
+  &copy; 2025 HorrorVerse. All rights reserved. | Contact | Privacy Policy
+</footer>
+
+</body>
+</html>

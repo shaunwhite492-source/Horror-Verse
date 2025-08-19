@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | HorrorVerse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: url('background.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      backdrop-filter: brightness(0.4);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pop-in { animation: popIn 0.6s ease-out forwards; }
+    .slide-up { animation: slideUp 0.8s ease-out forwards; }
+
+    h1 {
+      font-family: 'Creepster', cursive;
+      font-size: 48px;
+      color: #ff0000;
+      margin-bottom: 40px;
+      text-shadow: 2px 2px #000;
+    }
+
+    form {
+      background-color: rgba(26, 26, 26, 0.95);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #ff0000;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 300px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #ff0000;
+      color: white;
+      border: none;
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #8b0000;
+    }
+
+    .links {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #ccc;
+      text-align: center;
+    }
+
+    .links a {
+      color: #ff0000;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="pop-in">Enter the HorrorVerse</h1>
+
+  <form id="login-form" class="slide-up">
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Login</button>
+  </form>
+
+  <div class="links">
+    <a href="register.html">Join the Cult</a> |
+    <a href="#" onclick="forgotPassword()">Forgot Password?</a>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+  <script src="/firebase-init.js"></script>
+  <script>
+    const auth = firebase.auth();
+    const form = document.getElementById("login-form");
+
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = "dashboard.html";
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = form.email.value;
+      const pass = form.password.value;
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(() => window.location.href = "dashboard.html")
+        .catch(err => alert(err.message));
+    });
+
+    function forgotPassword() {
+      const email = prompt("Enter your email to receive a reset link:");
+      if (email) {
+        auth.sendPasswordResetEmail(email)
+          .then(() => alert("Password reset email sent. Check your inbox."))
+          .catch(err => alert(err.message));
+      }
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+
