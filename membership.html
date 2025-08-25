@@ -14,7 +14,6 @@
       padding: 40px;
       text-align: center;
     }
-
     h1 {
       font-family: 'Creepster', cursive;
       color: #ff4444;
@@ -22,14 +21,12 @@
       margin-bottom: 30px;
       text-shadow: 0 0 10px red;
     }
-
     .tiers {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
       gap: 30px;
     }
-
     .tier-card {
       background-color: rgba(26, 26, 26, 0.9);
       border: 2px solid #ff0000;
@@ -40,35 +37,29 @@
       transition: transform 0.3s, box-shadow 0.3s;
       position: relative;
     }
-
     .tier-card:hover {
       transform: scale(1.05);
       box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
     }
-
     .tier-card.selected {
       border: 2px solid #00ff00;
       box-shadow: 0 0 25px rgba(0, 255, 0, 0.5);
     }
-
     .tier-title {
       font-family: 'Creepster', cursive;
       font-size: 24px;
       color: #ff4444;
       margin-bottom: 10px;
     }
-
     .tier-price {
       font-size: 20px;
       margin-bottom: 10px;
     }
-
     .tier-desc {
       font-size: 14px;
       color: #ccc;
       margin-bottom: 20px;
     }
-
     button {
       background-color: #ff0000;
       color: white;
@@ -79,10 +70,13 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
+    button:hover { background-color: #a10000; }
 
-    button:hover {
-      background-color: #a10000;
-    }
+    .note { margin: 18px auto 0; color: #bbb; font-size: 13px; max-width: 680px; }
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;padding:12px 18px;
+      background:#111;color:#fff;border:1px solid #444;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.5);
+      opacity:0;transition:opacity .25s}
+    .toast.show{opacity:1}
   </style>
 </head>
 <body>
@@ -94,63 +88,154 @@
       <div class="tier-title">Free</div>
       <div class="tier-price">$0 / month</div>
       <div class="tier-desc">Basic storefront<br>3 posts max<br>Limited features</div>
-      <button onclick="updateMembership('Free')">Choose Free</button>
+      <button data-action="choose-tier">Choose Free</button>
     </div>
+
     <div class="tier-card" data-tier="Pro">
       <div class="tier-title">Pro</div>
       <div class="tier-price">$9.99 / month</div>
       <div class="tier-desc">Custom branding<br>Unlimited posts<br>Analytics & Merch Tools</div>
-      <button onclick="updateMembership('Pro')">Choose Pro</button>
+      <button data-action="choose-tier">Choose Pro</button>
     </div>
+
     <div class="tier-card" data-tier="Elite">
       <div class="tier-title">Elite</div>
       <div class="tier-price">$19.99 / month</div>
       <div class="tier-desc">Priority promotion<br>Featured homepage slot<br>Early access to beta tools</div>
-      <button onclick="updateMembership('Elite')">Choose Elite</button>
+      <button data-action="choose-tier">Choose Elite</button>
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <p class="note">
+    Pro/Elite use secure Stripe Checkout. You can manage your subscription any time via “Manage Billing”.
+  </p>
+
+  <div id="billing-controls" style="margin-top:24px;"></div>
+  <div id="toast" class="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
   <script src="/firebase-init.js"></script>
+
   <script>
+    function showToast(msg, ms=2200){
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(()=>el.classList.remove("show"), ms);
+    }
+
     const auth = firebase.auth();
     const db = firebase.firestore();
-    let currentUser;
+    let currentUser = null;
+
+    // TODO: set your deployed function URLs
+    const API_CHECKOUT = "https://us-central1-<YOUR-PROJECT>.cloudfunctions.net/createSubscriptionCheckout";
+    const API_PORTAL   = "https://us-central1-<YOUR-PROJECT>.cloudfunctions.net/createBillingPortal";
 
     auth.onAuthStateChanged(async (user) => {
       if (!user) return window.location.href = "login.html";
       currentUser = user;
-      const doc = await db.collection("users").doc(currentUser.uid).get();
-      const currentTier = doc.data()?.membership || "Free";
-      highlightCurrentPlan(currentTier);
+
+      try {
+        const snap = await db.collection("users").doc(currentUser.uid).get();
+        const currentTier = snap.exists ? (snap.data().membership || "Free") : "Free";
+        highlightCurrentPlan(currentTier);
+        if (currentTier !== "Free") injectManageBillingButton();
+      } catch (e) {
+        console.error(e);
+        showToast("Could not load membership status");
+      }
+
+      const params = new URLSearchParams(location.search);
+      if (params.get("session_id")) {
+        showToast("Payment confirmed. Updating your membership...");
+        setTimeout(() => window.location.replace(location.pathname), 1500);
+      }
     });
 
-    function updateMembership(tier) {
-      if (!currentUser) return alert("You must be logged in.");
-      db.collection("users").doc(currentUser.uid).set({ membership: tier }, { merge: true })
-        .then(() => {
-          alert(`Successfully upgraded to the ${tier} plan!`);
-          highlightCurrentPlan(tier);
-        })
-        .catch(err => {
-          console.error("Error updating tier:", err);
-          alert("Error upgrading tier. Try again.");
+    document.addEventListener("click", async (e) => {
+      if (e.target.matches('button[data-action="choose-tier"]')) {
+        const card = e.target.closest(".tier-card");
+        if (!card) return;
+        const tier = card.dataset.tier;
+
+        if (tier === "Free") {
+          showToast("Free plan selected. To cancel a paid plan, use Manage Billing.");
+          return;
+        }
+        await startCheckout(tier);
+      }
+      if (e.target.id === "manage-billing") {
+        await openBillingPortal();
+      }
+    });
+
+    async function startCheckout(tier){
+      if (!currentUser) return;
+      const payload = {
+        uid: currentUser.uid,
+        tier,
+        email: currentUser.email || "",
+        successUrl: location.origin + location.pathname,
+        cancelUrl: location.href
+      };
+      try {
+        const r = await fetch(API_CHECKOUT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
         });
+        const data = await r.json();
+        if (data.url) {
+          window.location = data.url;
+        } else {
+          showToast("Checkout error. Try again.");
+        }
+      } catch (e) {
+        console.error(e);
+        showToast("Network error. Try again.");
+      }
     }
 
-    function highlightCurrentPlan(tier) {
-      document.querySelectorAll(".tier-card").forEach(card => {
-        card.classList.remove("selected");
-      });
-      const selectedCard = document.querySelector(`.tier-card[data-tier="${tier}"]`);
-      if (selectedCard) selectedCard.classList.add("selected");
+    async function openBillingPortal(){
+      if (!currentUser) return;
+      try {
+        const r = await fetch(API_PORTAL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid: currentUser.uid, returnUrl: location.href })
+        });
+        const data = await r.json();
+        if (data.url) window.location = data.url;
+        else showToast("Could not open billing portal");
+      } catch (e) {
+        console.error(e);
+        showToast("Network error. Try again.");
+      }
+    }
+
+    function highlightCurrentPlan(tier){
+      document.querySelectorAll(".tier-card").forEach(c => c.classList.remove("selected"));
+      const card = document.querySelector(`.tier-card[data-tier="${tier}"]`);
+      if (card) card.classList.add("selected");
+    }
+
+    function injectManageBillingButton(){
+      if (document.getElementById("manage-billing")) return;
+      const btn = document.createElement("button");
+      btn.id = "manage-billing";
+      btn.textContent = "Manage Billing";
+      btn.style.marginTop = "24px";
+      document.getElementById("billing-controls").appendChild(btn);
     }
   </script>
 
 </body>
 </html>
+
+
 
 
 
